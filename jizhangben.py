@@ -35,8 +35,8 @@ st.markdown("""
 
 # ------------------ Supabase 配置 ------------------
 # ⚠️ 重要：替换成你实际的 URL 和 Key
-SUPABASE_URL = "https://你的项目.supabase.co"
-SUPABASE_KEY = "你的 anon key"
+SUPABASE_URL = "https://gfrkctjpdmkkueljdhke.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmcmtjdGpwZG1ra3VlbGpkaGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NDgzOTYsImV4cCI6MjA4ODUyNDM5Nn0.KD0xZE7LJHFggIla7cbuZm1qiMDlDzgOyBKHcJWa_Tw"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def load_data():
@@ -288,3 +288,4 @@ tips = [
     "🐻 钱钱要省着花哦",
 ]
 st.caption(f"✨ {random.choice(tips)}")
+
