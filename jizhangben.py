@@ -7,18 +7,37 @@ st.set_page_config(
     page_icon="🍽️",
     layout="centered"
 )
+import streamlit as st
 
-# ------------------ 可爱的背景装饰（随机飘浮的emoji） ------------------
-def draw_background_emoji():
-    emoji_list = ["🌸", "🍀", "✨", "🎈", "🧸", "🍰", "🐼", "🦊"]
-    # 随机选几个放在页面角落
-    cols = st.columns(5)
-    for i in range(5):
-        with cols[i]:
-            st.markdown(f"<h1 style='text-align: center; opacity: 0.3;'>{random.choice(emoji_list)}</h1>", unsafe_allow_html=True)
+st.set_page_config(page_title="好吃嘴的记账本", page_icon="🍽️", layout="centered")
 
-# 显示装饰（放在最上面）
-draw_background_emoji()
+# ========== 添加自定义 CSS 以优化手机显示 ==========
+st.markdown("""
+<style>
+    /* 当屏幕宽度小于 600px 时，让两列垂直堆叠 */
+    @media (max-width: 600px) {
+        div[data-testid="column"] {
+            width: 100% !important;
+            flex: unset !important;
+            margin-bottom: 20px;
+        }
+        /* 增加一些内边距，让内容更透气 */
+        .stButton button {
+            margin-top: 5px;
+        }
+    }
+    /* 统一调整输入框宽度 */
+    .stSelectbox, .stTextInput, .stNumberInput {
+        width: 100%;
+    }
+    /* 让按钮宽度自适应 */
+    .stButton button {
+        width: 100%;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# 然后继续你的原有代码...
 
 # ------------------ 缓存初始余额（5小时） ------------------
 @st.cache_data(ttl=18000)  # 5小时缓存
@@ -144,6 +163,7 @@ st.caption(f"✨ {random.choice(tips)}")
 
 # 再加一行漂浮装饰
 draw_background_emoji()
+
 
 
 
