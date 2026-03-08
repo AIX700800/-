@@ -123,7 +123,7 @@ with col1:
         }[x],
         key="cat_select"
     )
-  if category == "食品":
+if category == "食品":
     note = st.text_input("什么食品？", placeholder="例：奶茶 零食", key="food_note")
 elif category == "用品":
     note = st.text_input("什么用品？", placeholder="例：卫生巾 纸巾", key="用品_note")
@@ -291,6 +291,7 @@ tips = [
     "🐻 钱钱要省着花哦",
 ]
 st.caption(f"✨ {random.choice(tips)}")
+
 
 
 
