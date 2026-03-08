@@ -66,13 +66,13 @@ with col1:
     
     # 根据类别显示对应的备注输入框
     if category == "食品":
-        note = st.text_input("什么食品？", placeholder="例：火锅、奶茶", key="food_note")
+        note = st.text_input("什么食品？", placeholder="例：奶茶 零食", key="food_note")
     elif category == "用品":
-        note = st.text_input("什么用品？", placeholder="例：洗发水、纸巾", key="用品_note")
+        note = st.text_input("什么用品？", placeholder="例：卫生巾 纸巾", key="用品_note")
     elif category == "衣服":
-        note = st.text_input("什么衣服？", placeholder="例：T恤、裤子", key="cloth_note")
+        note = st.text_input("什么衣服？", placeholder="例：T恤 裤子", key="cloth_note")
     else:  # 出行
-        note = st.text_input("什么出行？", placeholder="例：打车、公交卡", key="travel_note")
+        note = st.text_input("什么出行？", placeholder="例：公交车 打车", key="travel_note")
     
     # 支出金额输入
     amount = st.number_input("金额", min_value=0.0, step=1.0, key="expense_amount")
@@ -89,10 +89,26 @@ with col1:
 # ================== 收入部分 ==================
 with col2:
     st.write("#### 💰 记录收入")
-
-    st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
-    # 收入备注
-    income_note = st.text_input("收入来源？", placeholder="例：工资、红包", key="income_note")
+    
+    # 收入类别选择（带图标）
+    income_cat = st.selectbox(
+        "收入类别",
+        options=["红包", "转账", "意外之财"],
+        format_func=lambda x: {
+            "红包": "🧧 红包",
+            "转账": "💸 转账",
+            "意外收入": "🤑 意外收入"
+        }[x],
+        key="income_cat_select"
+    )
+    
+    # 根据类别显示对应的备注输入框
+    if income_cat == "红包":
+        income_note = st.text_input("来自谁？", placeholder="例：亲戚 朋友", key="hongbao_note")
+    elif income_cat == "转账":
+        income_note = st.text_input("来自谁？", placeholder="例：爸爸 妈妈", key="transfer_note")
+    else:  # 意外收入
+        income_note = st.text_input("什么意外？", placeholder="例：捡到钱 彩票", key="unexpected_note")
     
     # 收入金额输入
     income_amount = st.number_input("金额", min_value=0.0, step=1.0, key="income_amount")
@@ -100,12 +116,12 @@ with col2:
     if st.button("✅ 确认收入", use_container_width=True):
         if income_amount > 0:
             st.session_state.余额 += income_amount
-            st.success(f"收入 {income_amount} 元（{income_note or '无备注'}）")
+            # 显示带图标的成功消息
+            icon_map = {"红包": "🧧", "转账": "💸", "意外收入": "🤑"}
+            st.success(f"收入 {income_amount} 元（{icon_map[income_cat]} {income_cat}：{income_note or '无备注'}）")
             st.rerun()
         else:
             st.warning("请输入金额")
-
-st.write("---")
 
 # ------------------ 重置按钮 ------------------
 col3, col4 = st.columns(2)
@@ -131,6 +147,7 @@ st.caption(f"✨ {random.choice(tips)}")
 
 # 再加一行漂浮装饰
 draw_background_emoji()
+
 
 
 
