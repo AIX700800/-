@@ -11,7 +11,7 @@ import streamlit as st
 
 st.set_page_config(page_title="好吃嘴的记账本", page_icon="🍽️", layout="centered")
 
-# ========== 添加自定义 CSS 以优化手机显示 ==========
+# ========== 添加自定义 CSS 以优化手机显示 ==========  
 st.markdown("""
 <style>
     /* 当屏幕宽度小于 600px 时，让两列垂直堆叠 */
@@ -51,6 +51,11 @@ st.write("---")
 # ------------------ 初始化余额 ------------------
 if '余额' not in st.session_state:
     st.session_state.余额 = get_initial_balance()
+    # ===== 新增：统计变量初始化 =====
+if '总支出' not in st.session_state:
+    st.session_state.总支出 = 0.0
+if '总收入' not in st.session_state:
+    st.session_state.总收入 = 0.0
 
 # ------------------ 显示当前余额 ------------------
 balance = st.session_state.余额
@@ -99,6 +104,7 @@ with col1:
     if st.button("✅ 确认支出", use_container_width=True):
         if amount > 0:
             st.session_state.余额 -= amount
+            st.session_state.总支出 += amount
             icon_map = {"食品": "🍔", "用品": "🧴", "衣服": "👕", "出行": "🚗"}
             st.success(f"支出 {amount} 元（{icon_map[category]} {category}：{note or '无备注'}）")
             st.rerun()
@@ -132,6 +138,7 @@ with col2:
     if st.button("✅ 确认收入", use_container_width=True):
         if income_amount > 0:
             st.session_state.余额 += income_amount
+            st.session_state.总收入 += income_amount
             # 显示带图标的成功消息
             icon_map = {"红包": "🧧", "转账": "💸", "意外收入": "🤑"}
             st.success(f"收入 {income_amount} 元（{icon_map[income_cat]} {income_cat}：{income_note or '无备注'}）")
@@ -162,6 +169,23 @@ tips = [
 st.caption(f"✨ {random.choice(tips)}")
 
 # 再加一行漂浮装饰
+st.write("---")
+st.write("### 📊 收支统计")
+
+# 使用三列布局让数字和按钮居中
+col_stat1, col_stat2, col_stat3 = st.columns(3)
+with col_stat1:
+    st.metric("总支出", f"{st.session_state.总支出:.1f} 元")
+with col_stat2:
+    st.metric("总收入", f"{st.session_state.总收入:.1f} 元")
+with col_stat3:
+    if st.button("🧹 重置统计", use_container_width=True):
+        st.session_state.总支出 = 0.0
+        st.session_state.总收入 = 0.0
+        st.rerun()
+
+st.write("---")  # 可选分隔线
+
 
 
 
