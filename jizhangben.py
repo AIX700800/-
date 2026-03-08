@@ -1,10 +1,14 @@
-st.set_page_config(
-    page_title="我的记账本",  # 好吃嘴的小记账本
-    page_icon="💰"            #💰
 import streamlit as st
 
-# 页面标题
-st.title("📒 jizhangben")
+# 【关键】设置浏览器标签页标题为“好吃嘴的记账本”
+st.set_page_config(
+    page_title="好吃嘴的记账本",  # 浏览器标签上显示的中文标题
+    page_icon="🍽️",              # 标签页图标换成好吃的
+    layout="centered"
+)
+
+# 页面内大标题
+st.title("🍽️ 好吃嘴的记账本")
 st.write("---")
 
 # 初始化余额为0
@@ -36,7 +40,7 @@ with col2:
 
 st.write("---")
 
-# 添加一个重置按钮（可以重置为0）
+# 添加重置按钮
 col3, col4 = st.columns(2)
 with col3:
     if st.button("🔄 重置为0", use_container_width=True):
@@ -48,9 +52,9 @@ with col4:
         st.session_state.余额 = 500
         st.rerun()
 
-# 显示操作记录（可选）
 st.write("---")
-st.caption("点击按钮记录收支，余额会自动更新")
+st.caption("好吃嘴，记得每次花钱记账哦！")
+
 
 
 
