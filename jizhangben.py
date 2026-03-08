@@ -1,8 +1,7 @@
 st.set_page_config(
     page_title="我的记账本",  # 好吃嘴的小记账本
     page_icon="💰"            #💰
-)
-import streamlit as st
+)import streamlit as st
 
 # 页面标题
 st.title("📒 jizhangben")
@@ -52,6 +51,7 @@ with col4:
 # 显示操作记录（可选）
 st.write("---")
 st.caption("点击按钮记录收支，余额会自动更新")
+
 
 
 
