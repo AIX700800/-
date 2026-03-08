@@ -1,9 +1,16 @@
 import streamlit as st
 import random
+from supabase import create_client, Client
+import json
 
-st.set_page_config(page_title="好吃嘴的记账本", page_icon="🍽️", layout="centered")
+# ------------------ 页面配置 ------------------
+st.set_page_config(
+    page_title="好吃嘴的记账本",
+    page_icon="🍽️",
+    layout="centered"
+)
 
-# 自定义 CSS（保持不变）
+# ========== 自定义 CSS 优化手机显示 ==========
 st.markdown("""
 <style>
     @media (max-width: 600px) {
@@ -25,25 +32,65 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# ------------------ Supabase 配置 ------------------
+# ⚠️ 重要：这里要换成你实际的 Supabase URL 和 Key
+SUPABASE_URL = "https://gfrkctjpdmkkueljdhke.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmcmtjdGpwZG1ra3VlbGpkaGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NDgzOTYsImV4cCI6MjA4ODUyNDM5Nn0.KD0xZE7LJHFggIla7cbuZm1qiMDlDzgOyBKHcJWa_Tw"
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+def load_data():
+    """从 Supabase 加载数据"""
+    try:
+        response = supabase.table("accounts").select("*").execute()
+        if response.data:
+            data_dict = {}
+            for item in response.data:
+                try:
+                    data_dict[item['key']] = json.loads(item['value'])
+                except:
+                    data_dict[item['key']] = item['value']
+            return data_dict
+    except Exception as e:
+        st.error(f"加载数据失败：{e}")
+    return {}
+
+def save_data(key, value):
+    """保存数据到 Supabase"""
+    try:
+        # 先删除旧数据
+        supabase.table("accounts").delete().eq("key", key).execute()
+        # 插入新数据
+        supabase.table("accounts").insert({
+            "key": key,
+            "value": json.dumps(value, ensure_ascii=False)
+        }).execute()
+    except Exception as e:
+        st.error(f"保存数据失败：{e}")
+
 # ------------------ 缓存初始余额 ------------------
 @st.cache_data(ttl=18000)
 def get_initial_balance():
     return 0
 
+# ------------------ 标题 ------------------
 st.title("🍽️ 好吃嘴的记账本")
 st.write("---")
 
-# ------------------ 初始化 ------------------
-if '余额' not in st.session_state:
+# ------------------ 加载数据到 session_state ------------------
+loaded_data = load_data()
+if loaded_data:
+    # 从 Supabase 加载数据
+    st.session_state.余额 = loaded_data.get("余额", get_initial_balance())
+    st.session_state.总支出 = loaded_data.get("总支出", 0.0)
+    st.session_state.总收入 = loaded_data.get("总收入", 0.0)
+    st.session_state.支出记录 = loaded_data.get("支出记录", [])
+    st.session_state.收入记录 = loaded_data.get("收入记录", [])
+else:
+    # 首次使用，初始化默认值
     st.session_state.余额 = get_initial_balance()
-if '总支出' not in st.session_state:
     st.session_state.总支出 = 0.0
-if '总收入' not in st.session_state:
     st.session_state.总收入 = 0.0
-# ===== 新增：记录明细列表 =====
-if '支出记录' not in st.session_state:
     st.session_state.支出记录 = []
-if '收入记录' not in st.session_state:
     st.session_state.收入记录 = []
 
 # 显示余额
@@ -82,16 +129,23 @@ with col1:
     else:
         note = st.text_input("什么出行？", placeholder="例：公交车 打车", key="travel_note")
     amount = st.number_input("金额", min_value=0.0, step=1.0, key="expense_amount")
-    if st.button("✅ 确认支出", use_container_width=True):
+    
+    if st.button("✅ 确认支出", use_container_width=True, key="expense_btn"):
         if amount > 0:
+            # 更新数据
             st.session_state.余额 -= amount
             st.session_state.总支出 += amount
-            # ===== 新增：记录支出明细 =====
             st.session_state.支出记录.append({
                 "类别": category,
                 "金额": amount,
                 "备注": note or "无备注"
             })
+            
+            # 保存到 Supabase
+            save_data("余额", st.session_state.余额)
+            save_data("总支出", st.session_state.总支出)
+            save_data("支出记录", st.session_state.支出记录)
+            
             icon_map = {"食品": "🍔", "用品": "🧴", "衣服": "👕", "出行": "🚗"}
             st.success(f"支出 {amount} 元（{icon_map[category]} {category}：{note or '无备注'}）")
             st.rerun()
@@ -114,16 +168,23 @@ with col2:
     else:
         income_note = st.text_input("什么意外？", placeholder="例：捡到钱 彩票", key="unexpected_note")
     income_amount = st.number_input("金额", min_value=0.0, step=1.0, key="income_amount")
-    if st.button("✅ 确认收入", use_container_width=True):
+    
+    if st.button("✅ 确认收入", use_container_width=True, key="income_btn"):
         if income_amount > 0:
+            # 更新数据
             st.session_state.余额 += income_amount
             st.session_state.总收入 += income_amount
-            # ===== 新增：记录收入明细 =====
             st.session_state.收入记录.append({
                 "类别": income_cat,
                 "金额": income_amount,
                 "备注": income_note or "无备注"
             })
+            
+            # 保存到 Supabase
+            save_data("余额", st.session_state.余额)
+            save_data("总收入", st.session_state.总收入)
+            save_data("收入记录", st.session_state.收入记录)
+            
             icon_map = {"红包": "🧧", "转账": "💸", "意外收入": "🤑"}
             st.success(f"收入 {income_amount} 元（{icon_map[income_cat]} {income_cat}：{income_note or '无备注'}）")
             st.rerun()
@@ -137,15 +198,17 @@ col3, col4 = st.columns(2)
 with col3:
     if st.button("🔄 重置为0", use_container_width=True):
         st.session_state.余额 = 0
+        save_data("余额", 0)  # 保存到 Supabase
         st.rerun()
 with col4:
     if st.button("💰 重置为500", use_container_width=True):
         st.session_state.余额 = 500
+        save_data("余额", 500)  # 保存到 Supabase
         st.rerun()
 
 st.write("---")
 
-# ================== 重置统计按钮（独立） ==================
+# ================== 重置统计按钮 ==================
 col_reset1, col_reset2, col_reset3 = st.columns([1, 2, 1])
 with col_reset2:
     if st.button("🧹 重置统计", use_container_width=True):
@@ -153,6 +216,11 @@ with col_reset2:
         st.session_state.总收入 = 0.0
         st.session_state.支出记录 = []
         st.session_state.收入记录 = []
+        # 保存到 Supabase
+        save_data("总支出", 0.0)
+        save_data("总收入", 0.0)
+        save_data("支出记录", [])
+        save_data("收入记录", [])
         st.rerun()
 
 st.write("---")
@@ -206,28 +274,3 @@ tips = [
     "🐻 钱钱要省着花哦",
 ]
 st.caption(f"✨ {random.choice(tips)}")
-import streamlit as st
-import random
-from supabase import create_client, Client
-import json
-
-# ------------------ Supabase 配置 ------------------
-SUPABASE_URL = "https://你的项目.supabase.co"
-SUPABASE_KEY = "你的 anon key"
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-def load_data():
-    try:
-        response = supabase.table("jizhang_data").select("*").execute()
-        if response.data:
-            return {item['key']: json.loads(item['value']) for item in response.data}
-    except Exception as e:
-        st.error(f"加载数据失败：{e}")
-    return {}
-
-def save_data(key, value):
-    try:
-        supabase.table("jizhang_data").delete().eq("key", key).execute()
-        supabase.table("jizhang_data").insert({"key": key, "value": json.dumps(value)}).execute()
-    except Exception as e:
-        st.error(f"保存数据失败：{e}")
