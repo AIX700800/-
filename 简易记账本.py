@@ -2,7 +2,7 @@ python
 import streamlit as st
 
 # 页面标题
-st.title("📒 简易记账本")
+st.title("📒 jizhangben")
 st.write("---")
 
 # 初始化余额为0
@@ -49,3 +49,4 @@ with col4:
 # 显示操作记录（可选）
 st.write("---")
 st.caption("点击按钮记录收支，余额会自动更新")
+
