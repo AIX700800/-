@@ -94,13 +94,10 @@ with col2:
     income_cat = st.selectbox(
         "收入类别",
         options=["红包", "转账", "意外之财"],
-        format_func=lambda x: {
-            "红包": "🧧 红包",
-            "转账": "💸 转账",
-            "意外收入": "🤑 意外收入"
-        }[x],
+       format_func=lambda x: "🧧 红包" if x == "红包" else ("💸 转账" if x == "转账" else "🤑 意外收入"),
         key="income_cat_select"
     )
+
     
     # 根据类别显示对应的备注输入框
     if income_cat == "红包":
@@ -147,6 +144,7 @@ st.caption(f"✨ {random.choice(tips)}")
 
 # 再加一行漂浮装饰
 draw_background_emoji()
+
 
 
 
