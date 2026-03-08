@@ -119,17 +119,20 @@ with col1:
             "用品": "🧴 用品",
             "衣服": "👕 衣服",
             "出行": "🚗 出行"
+            "现金": "💵 现金"
         }[x],
         key="cat_select"
     )
-    if category == "食品":
-        note = st.text_input("什么食品？", placeholder="例：奶茶 零食", key="food_note")
-    elif category == "用品":
-        note = st.text_input("什么用品？", placeholder="例：卫生巾 纸巾", key="用品_note")
-    elif category == "衣服":
-        note = st.text_input("什么衣服？", placeholder="例：T恤 裤子", key="cloth_note")
-    else:
-        note = st.text_input("什么出行？", placeholder="例：公交车 打车", key="travel_note")
+  if category == "食品":
+    note = st.text_input("什么食品？", placeholder="例：奶茶 零食", key="food_note")
+elif category == "用品":
+    note = st.text_input("什么用品？", placeholder="例：卫生巾 纸巾", key="用品_note")
+elif category == "衣服":
+    note = st.text_input("什么衣服？", placeholder="例：T恤 裤子", key="cloth_note")
+elif category == "出行":
+    note = st.text_input("什么出行？", placeholder="例：公交车 打车", key="travel_note")
+else:  # 现金
+    note = st.text_input("什么现金支出？", placeholder="例：买菜 零花钱", key="cash_note")
     amount = st.number_input("金额", min_value=0.0, step=1.0, key="expense_amount")
     
     if st.button("✅ 确认支出", use_container_width=True, key="expense_btn"):
@@ -153,7 +156,7 @@ with col1:
             save_data("总支出", st.session_state.总支出)
             save_data("支出记录", st.session_state.支出记录)
             
-            icon_map = {"食品": "🍔", "用品": "🧴", "衣服": "👕", "出行": "🚗"}
+            cat_icons = {"食品": "🍔", "用品": "🧴", "衣服": "👕", "出行": "🚗", "现金": "💵"}
             st.success(f"支出 {amount} 元（{icon_map[category]} {category}：{note or '无备注'}）")
             st.rerun()
         else:
@@ -288,5 +291,6 @@ tips = [
     "🐻 钱钱要省着花哦",
 ]
 st.caption(f"✨ {random.choice(tips)}")
+
 
 
