@@ -162,7 +162,6 @@ tips = [
 st.caption(f"✨ {random.choice(tips)}")
 
 # 再加一行漂浮装饰
-draw_background_emoji()
 
 
 
