@@ -90,7 +90,6 @@ with col1:
 with col2:
     st.write("#### 💰 记录收入")
 
- # 👇 在这里插入下面这行（空白占位）
     st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
     # 收入备注
     income_note = st.text_input("收入来源？", placeholder="例：工资、红包", key="income_note")
@@ -132,5 +131,6 @@ st.caption(f"✨ {random.choice(tips)}")
 
 # 再加一行漂浮装饰
 draw_background_emoji()
+
 
 
