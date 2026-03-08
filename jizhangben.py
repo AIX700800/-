@@ -2,6 +2,7 @@ import streamlit as st
 import random
 from supabase import create_client, Client
 import json
+import datetime  # 用于记录实时时间
 
 # ------------------ 页面配置 ------------------
 st.set_page_config(
@@ -33,14 +34,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ------------------ Supabase 配置 ------------------
-# ⚠️ 重要：这里要换成你实际的 Supabase URL 和 Key
-SUPABASE_URL = "https://gfrkctjpdmkkueljdhke.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmcmtjdGpwZG1ra3VlbGpkaGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NDgzOTYsImV4cCI6MjA4ODUyNDM5Nn0.KD0xZE7LJHFggIla7cbuZm1qiMDlDzgOyBKHcJWa_Tw"
+# ⚠️ 重要：替换成你实际的 URL 和 Key
+SUPABASE_URL = "https://你的项目.supabase.co"
+SUPABASE_KEY = "你的 anon key"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def load_data():
     """从 Supabase 加载数据"""
     try:
+        # 使用你的实际表名（可能是 accounts 或 jizhang_data）
         response = supabase.table("accounts").select("*").execute()
         if response.data:
             data_dict = {}
@@ -132,13 +134,18 @@ with col1:
     
     if st.button("✅ 确认支出", use_container_width=True, key="expense_btn"):
         if amount > 0:
+            # 获取当前实时时间（精确到秒）
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
             # 更新数据
             st.session_state.余额 -= amount
             st.session_state.总支出 += amount
+            # 记录支出明细（带实时时间）
             st.session_state.支出记录.append({
                 "类别": category,
                 "金额": amount,
-                "备注": note or "无备注"
+                "备注": note or "无备注",
+                "时间": current_time  # 实时时间
             })
             
             # 保存到 Supabase
@@ -171,13 +178,18 @@ with col2:
     
     if st.button("✅ 确认收入", use_container_width=True, key="income_btn"):
         if income_amount > 0:
+            # 获取当前实时时间（精确到秒）
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
             # 更新数据
             st.session_state.余额 += income_amount
             st.session_state.总收入 += income_amount
+            # 记录收入明细（带实时时间）
             st.session_state.收入记录.append({
                 "类别": income_cat,
                 "金额": income_amount,
-                "备注": income_note or "无备注"
+                "备注": income_note or "无备注",
+                "时间": current_time  # 实时时间
             })
             
             # 保存到 Supabase
@@ -198,12 +210,12 @@ col3, col4 = st.columns(2)
 with col3:
     if st.button("🔄 重置为0", use_container_width=True):
         st.session_state.余额 = 0
-        save_data("余额", 0)  # 保存到 Supabase
+        save_data("余额", 0)
         st.rerun()
 with col4:
     if st.button("💰 重置为500", use_container_width=True):
         st.session_state.余额 = 500
-        save_data("余额", 500)  # 保存到 Supabase
+        save_data("余额", 500)
         st.rerun()
 
 st.write("---")
@@ -225,7 +237,7 @@ with col_reset2:
 
 st.write("---")
 
-# ================== 收支明细统计 ==================
+# ================== 收支明细统计（带实时时间显示） ==================
 st.write("### 📊 收支明细统计")
 col_stat_left, col_stat_right = st.columns(2)
 
@@ -243,7 +255,8 @@ with col_stat_left:
             cat_records = [r for r in st.session_state.支出记录 if r["类别"] == cat]
             if cat_records:
                 for r in cat_records:
-                    st.write(f"  • {r['备注']}：{r['金额']} 元")
+                    # 显示时间和备注
+                    st.write(f"  • {r['时间']} {r['备注']}：{r['金额']} 元")
             else:
                 st.write("  暂无记录")
 
@@ -260,7 +273,8 @@ with col_stat_right:
             cat_records = [r for r in st.session_state.收入记录 if r["类别"] == cat]
             if cat_records:
                 for r in cat_records:
-                    st.write(f"  • {r['备注']}：{r['金额']} 元")
+                    # 显示时间和备注
+                    st.write(f"  • {r['时间']} {r['备注']}：{r['金额']} 元")
             else:
                 st.write("  暂无记录")
 
