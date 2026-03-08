@@ -72,7 +72,7 @@ def save_data(key, value):
 # ------------------ 缓存初始余额 ------------------
 @st.cache_data(ttl=18000)
 def get_initial_balance():
-    return 0
+    return 497.27
 
 # ------------------ 标题 ------------------
 st.title("🍽️ 好吃嘴的记账本")
@@ -288,4 +288,5 @@ tips = [
     "🐻 钱钱要省着花哦",
 ]
 st.caption(f"✨ {random.choice(tips)}")
+
 
